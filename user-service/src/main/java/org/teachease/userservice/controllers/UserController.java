@@ -39,4 +39,5 @@ public class UserController {
         userInfoDTO.setUserId(userId);
         return userService.createOrUpdateUser(userInfoDTO);
     }
+
 }

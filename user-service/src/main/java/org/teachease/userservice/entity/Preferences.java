@@ -76,4 +76,12 @@ public class Preferences {
     public void setWhatsappNotification(boolean whatsappNotification) {
         this.whatsappNotification = whatsappNotification;
     }
+    public static Preferences getDefault(){
+        Preferences preferences = new Preferences();
+        preferences.setTheme("default");
+        preferences.setEmailNotification(true);
+        preferences.setSmsNotification(true);
+        preferences.setWhatsappNotification(true);
+        return preferences;
+    }
 }

@@ -1,8 +1,10 @@
 package org.teachease.authservice.enitites;
 
 import jakarta.persistence.*;
+import org.teachease.authservice.dtos.UserDTO;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Entity
@@ -46,5 +48,8 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+    public UserDTO getUserDTO() {
+        return new UserDTO(id, password, email, Optional.ofNullable(name));
     }
 }

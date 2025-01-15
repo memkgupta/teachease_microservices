@@ -10,7 +10,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 public class AuthServiceApplication {
 
     public static void main(String[] args) {
-        Dotenv dotenv = Dotenv.configure().load();
+//        Dotenv dotenv = Dotenv.configure().load();
         SpringApplication.run(AuthServiceApplication.class, args);
     }
 
