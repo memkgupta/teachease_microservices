@@ -1,0 +1,100 @@
+package org.teachease.courseservice.entities;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "test")
+public class TestDTO {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+    private String testId;
+    private String title;
+    private String description;
+    private boolean isAiGenerated;
+    private String moduleId;
+    private boolean aiEvaluation;
+    private Long totalTime;
+    private int points;
+    private String courseId;
+
+    public String getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(String courseId) {
+        this.courseId = courseId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getTestId() {
+        return testId;
+    }
+
+    public void setTestId(String testId) {
+        this.testId = testId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public boolean isAiGenerated() {
+        return isAiGenerated;
+    }
+
+    public void setAiGenerated(boolean aiGenerated) {
+        isAiGenerated = aiGenerated;
+    }
+
+    public String getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(String moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public boolean isAiEvaluation() {
+        return aiEvaluation;
+    }
+
+    public void setAiEvaluation(boolean aiEvaluation) {
+        this.aiEvaluation = aiEvaluation;
+    }
+
+    public Long getTotalTime() {
+        return totalTime;
+    }
+
+    public void setTotalTime(Long totalTime) {
+        this.totalTime = totalTime;
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+}
