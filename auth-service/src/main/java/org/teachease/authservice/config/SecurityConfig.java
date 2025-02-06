@@ -36,7 +36,7 @@ public class SecurityConfig {
 
         http.cors(Customizer.withDefaults()).csrf(csrf->csrf.disable()).authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
-                        .requestMatchers("/register","/login","/oauth/google").permitAll()
+                        .requestMatchers("/api/v1/auth/register","/api/v1/auth/login","/api/v1/auth/oauth/google").permitAll()
                         .anyRequest().authenticated()
                 ).sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless sessions

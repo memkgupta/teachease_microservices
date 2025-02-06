@@ -1,6 +1,7 @@
 package org.teachease.courseservice.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.sql.Timestamp;
 
@@ -8,6 +9,7 @@ import java.sql.Timestamp;
 @Table(name = "course_enrollment",uniqueConstraints = {
         @UniqueConstraint(columnNames = {"course","student"})
 })
+@Data
 public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -21,59 +23,5 @@ public class Enrollment {
     private Timestamp createdAt;
     private int points;
 
-    public String getId() {
-        return id;
-    }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public CourseEntity getCourse() {
-        return course;
-    }
-
-    public void setCourse(CourseEntity course) {
-        this.course = course;
-    }
-
-    public String getStudentId() {
-        return studentId;
-    }
-
-    public void setStudentId(String studentId) {
-        this.studentId = studentId;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public Timestamp getLastActivity() {
-        return lastActivity;
-    }
-
-    public void setLastActivity(Timestamp lastActivity) {
-        this.lastActivity = lastActivity;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public int getPoints() {
-        return points;
-    }
-
-    public void setPoints(int points) {
-        this.points = points;
-    }
 }

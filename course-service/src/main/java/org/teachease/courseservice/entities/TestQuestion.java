@@ -4,23 +4,18 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
-@Entity
-@Table
+
 public class TestQuestion {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+
     private String id;
     private String question;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+
     private TestQuestionSolution solution;
-    @ElementCollection
-    @CollectionTable(name = "question_options", joinColumns = @JoinColumn(name = "question_id"))
-    @Column(name = "options")
+
     List<String> options;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="test_id")
+
     private Test test;
-    @Column(nullable = false)
+
     private String courseId;
 
     public String getId() {

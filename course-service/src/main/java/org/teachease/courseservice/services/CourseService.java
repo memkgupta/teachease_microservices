@@ -2,25 +2,29 @@ package org.teachease.courseservice.services;
 
 import org.springframework.stereotype.Service;
 import org.teachease.courseservice.dtos.CourseDTO;
+import org.teachease.courseservice.dtos.authorisation.RelationDTO;
+import org.teachease.courseservice.dtos.authorisation.ResourceDTO;
 import org.teachease.courseservice.entities.Assignment;
 import org.teachease.courseservice.entities.CourseEntity;
 import org.teachease.courseservice.entities.ModuleList;
 import org.teachease.courseservice.entities.TestDTO;
 import org.teachease.courseservice.repositories.CourseRepository;
-import org.teachease.courseservice.repositories.ModuleRepository;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
 public class CourseService {
+    private final Authorisation authorisation;
     private final CourseRepository courseRepository;
-    private final ModuleRepository moduleRepository;
 
-    public CourseService(CourseRepository courseRepository, ModuleRepository moduleRepository) {
+
+    public CourseService(Authorisation authorisation, CourseRepository courseRepository) {
+        this.authorisation = authorisation;
         this.courseRepository = courseRepository;
-        this.moduleRepository = moduleRepository;
+
     }
     public CourseDTO createCourse(CourseDTO courseDTO,String userId) {
       try{
@@ -32,11 +36,19 @@ public class CourseService {
           course.setTitle(courseDTO.getTitle());
           course.setDescription(courseDTO.getDescription());
           courseRepository.save(course);
-          ModuleList moduleList = new ModuleList();
-          moduleList.setCourse(course);
-          moduleRepository.save(moduleList);
-          course.setModules(moduleList);
-          courseRepository.save(course);
+authorisation.addRelation(RelationDTO.builder()
+                .created(new Timestamp(System.currentTimeMillis()))
+                .description("Course")
+                .name("OWNER")
+        .resource(ResourceDTO.builder()
+                .created(new Timestamp(System.currentTimeMillis()))
+                .owner(userId)
+                .resourceType("course")
+                .resourceId(course.getId())
+                .resourceName("course")
+                .build())
+                .userId(userId)
+        .build());
           return course.courseDTO();
       }
       catch(Exception e){
@@ -44,11 +56,15 @@ public class CourseService {
           throw new RuntimeException("Internal Server Error");
       }
     }
-    public CourseDTO updateCourse(CourseDTO courseDTO) {
+    public CourseDTO updateCourse(CourseDTO courseDTO,String userId) {
         try{
             CourseEntity course = courseRepository.findById(courseDTO.getId()).orElse(null);
             if(course==null){
                 throw new RuntimeException("Course not found");
+            }
+           boolean permission = authoriseWriteCourse(course.getId(),userId);
+            if(!permission){
+                throw new RuntimeException("Permission denied");
             }
             course.setEndDate(courseDTO.getEndDate());
             course.setStartDate(courseDTO.getStartDate());
@@ -62,13 +78,18 @@ public class CourseService {
             throw new RuntimeException("Internal Server Error");
         }
     }
-    public boolean deleteCourse(CourseDTO courseDTO) {
+    public boolean deleteCourse(String courseId,String userId) {
         try{
-            CourseEntity course = courseRepository.findById(courseDTO.getId()).orElse(null);
+            CourseEntity course = courseRepository.findById(courseId).orElse(null);
             if(course==null){
                 throw new RuntimeException("Course not found");
             }
+            boolean permission = authoriseDeleteCourse(course.getId(),userId);
+            if(!permission){
+                throw new RuntimeException("Permission denied");
+            }
             courseRepository.delete(course);
+            authorisation.deleteResource(ResourceDTO.builder().resourceId(course.getId()).build());
             return true;
         }
         catch(Exception e){
@@ -88,16 +109,59 @@ public class CourseService {
             throw new RuntimeException("Internal Server Error");
         }
     }
-    public CourseDTO getCourse(String courseId) {
+    public CourseEntity getCourse(String courseId) {
         try{
             CourseEntity course = courseRepository.findById(courseId).orElse(null);
 
+            return course;
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("Internal Server Error");
+        }
+    }
+    public CourseDTO getCourse(String courseId,String enrollmentId,String userId) {
+        try{
+            CourseEntity course = courseRepository.findById(courseId).orElse(null);
+          boolean permission = authoriseReadCourse(courseId,userId,enrollmentId);
+            if(!permission)
+            {
+                throw new RuntimeException("Do not have permission");
+            }
          return course.courseDTO();
         }
         catch(Exception e){
             e.printStackTrace();
             throw new RuntimeException("Internal Server Error");
         }
+    }
+    public boolean authoriseReadCourse(String courseId,String userId,String enrollmentId) {
+        HashMap<String,String> queryMap = new HashMap<>();
+        queryMap.put("resourceId",courseId);
+        queryMap.put("extraInfo",enrollmentId);
+        queryMap.put("action","READ");
+        queryMap.put("userId",userId);
+        queryMap.put("resourceName","course."+courseId);
+        boolean permission = authorisation.authorise(queryMap);
+        return permission;
+    }
+    public boolean authoriseWriteCourse(String courseId,String userId){
+        HashMap<String,String> queryMap = new HashMap<>();
+        queryMap.put("resourceId",courseId);
+        queryMap.put("userId",userId);
+        queryMap.put("action","WRITE");
+        queryMap.put("resourceName","course."+courseId);
+        boolean permission = authorisation.authorise(queryMap);
+        return permission;
+    }
+    public boolean authoriseDeleteCourse(String courseId,String userId) {
+        HashMap<String,String> queryMap = new HashMap<>();
+        queryMap.put("resourceId",courseId);
+        queryMap.put("userId",userId);
+        queryMap.put("resourceName","course."+courseId);
+        queryMap.put("action","DELETE");
+        boolean permission = authorisation.authorise(queryMap);
+        return permission;
     }
 
 }

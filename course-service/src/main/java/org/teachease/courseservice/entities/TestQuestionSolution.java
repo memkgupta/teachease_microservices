@@ -2,13 +2,11 @@ package org.teachease.courseservice.entities;
 
 import jakarta.persistence.*;
 
-@Entity
-@Table
+
 public class TestQuestionSolution {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+
     private String id;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+
     private TestQuestion question;
     private String solution;
     private String solType;

@@ -17,8 +17,23 @@ spring:
         - id: auth-service
           uri: lb://auth-service
           filters:
-            - RewritePath=/api/v1/auth/?(?<segment>.*),/${segment}
+            AuthenticationFilter
+
           predicates:
             - Path=/api/v1/auth/**
+        - id: course-service
+          uri: lb://course-service
+          filters:
+            AuthenticationFilter
+          predicates:
+            - Path=/api/v1/course/**
+
+        - id: authorisation-service
+          uri: lb://authorisation-service
+          filters:
+             AuthenticationFilter
+          predicates:
+            - Path=/api/v1/authorisation/**
+
 server:
   port: 8001

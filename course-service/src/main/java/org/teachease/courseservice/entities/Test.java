@@ -2,19 +2,15 @@ package org.teachease.courseservice.entities;
 
 import jakarta.persistence.*;
 
-@Entity
-@Table
 public class Test {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+
     private String id;
     private String title;
     private String description;
     private boolean isAiGenerated;
-    @Column(nullable = false)
+
     private String courseId;
-    @ManyToOne
-    @JoinColumn(name = "module_id")
+
     private Module module;
     private boolean aiEvaluation;
     private Long totalTime;

@@ -1,11 +1,15 @@
 package org.teachease.courseservice.dtos;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.teachease.courseservice.entities.ModuleList;
 
 import java.sql.Timestamp;
 import java.util.List;
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CourseDTO {
+    public CourseDTO() {
+    }
+
     public String getId() {
         return id;
     }
@@ -62,14 +66,14 @@ public class CourseDTO {
         this.createdAt = createdAt;
     }
 
-    private String id;
+    private String id = null;
     private String title;
     private String description;
-    private String teacherId;
+    private String teacherId = null;
     private Timestamp startDate;
     private Timestamp endDate;
-    private Timestamp createdAt;
-
+    private Timestamp createdAt = null;
+    private ModuleListDTO moduleList;
     public ModuleListDTO getModule() {
         return moduleList;
     }
@@ -78,5 +82,12 @@ public class CourseDTO {
         this.moduleList = module;
     }
 
-    private ModuleListDTO moduleList;
+    public CourseDTO(String title, String description, Timestamp startDate, Timestamp endDate) {
+        this.title = title;
+        this.description = description;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
+
 }

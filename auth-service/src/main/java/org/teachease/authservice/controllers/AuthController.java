@@ -9,7 +9,7 @@ import org.teachease.authservice.services.AuthService;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
     private final AuthService authService;
 
@@ -19,6 +19,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody UserDTO userDTO){
+        System.out.println("Hello login");
         return ResponseEntity.ok(authService.login(userDTO.email(), userDTO.password()));
     }
     @PostMapping("/register")

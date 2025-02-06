@@ -1,13 +1,23 @@
 package org.teachease.courseservice.entities;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.teachease.courseservice.dtos.ModuleDTO;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Module {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -17,123 +27,22 @@ public class Module {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
     private CourseEntity course;
-    @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "next_module")
-    private Module nextModule;
-    @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "prev_module")
-    private Module prevModule;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Module parent;
     private int priority;
     private Timestamp startDate;
     private Timestamp endDate;
     private Timestamp createdAt;
+    @OneToMany(mappedBy = "parent",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Module> subModules;
     @OneToMany(mappedBy = "module",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Assignment> assignments;
     @OneToMany(mappedBy = "module",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notes> notes;
 
-
-    public List<Assignment> getAssignments() {
-        return assignments;
-    }
-
-    public void setAssignments(List<Assignment> assignments) {
-        this.assignments = assignments;
-    }
-
-    public List<Notes> getNotes() {
-        return notes;
-    }
-
-    public void setNotes(List<Notes> notes) {
-        this.notes = notes;
-    }
-
-
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public CourseEntity getCourse() {
-        return course;
-    }
-
-    public void setCourse(CourseEntity course) {
-        this.course = course;
-    }
-
-    public Module getNextModule() {
-        return nextModule;
-    }
-
-    public void setNextModule(Module nextModule) {
-        this.nextModule = nextModule;
-    }
-
-    public Module getPrevModule() {
-        return prevModule;
-    }
-
-    public void setPrevModule(Module prevModule) {
-        this.prevModule = prevModule;
-    }
-
-    public int getPriority() {
-        return priority;
-    }
-
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
-
-    public Timestamp getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Timestamp startDate) {
-        this.startDate = startDate;
-    }
-
-    public Timestamp getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Timestamp endDate) {
-        this.endDate = endDate;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
     public ModuleDTO getPartialDTO() {
 
         ModuleDTO partialDTO = new ModuleDTO();
-
         partialDTO.setTitle(title);
         partialDTO.setDescription(description);
         partialDTO.setId(id);
@@ -141,24 +50,36 @@ public class Module {
         partialDTO.setStartDate(startDate);
         partialDTO.setEndDate(endDate);
         partialDTO.setCreatedAt(createdAt);
-        ModuleDTO headDTO = new ModuleDTO();
-        headDTO.setNext(partialDTO);
-        Module head = this;
-//        Module temp = this.nextModule;
-        while (head != null) {
-           ModuleDTO nextDTO = new ModuleDTO();
-           nextDTO.setId(head.getId());
-           nextDTO.setTitle(head.getTitle());
-           nextDTO.setDescription(head.getDescription());
-           nextDTO.setPriority(head.getPriority());
-           nextDTO.setStartDate(head.getStartDate());
-           nextDTO.setEndDate(head.getEndDate());
-           nextDTO.setCreatedAt(head.getCreatedAt());
-           nextDTO.setPrevious(partialDTO);
-           partialDTO.setNext(nextDTO);
-           partialDTO = partialDTO.getNext();
-            head = head.getNextModule();
-        }
-        return headDTO.getNext();
+
+        return partialDTO;
+    }
+    public ModuleDTO getDTO() {
+        ModuleDTO moduleDTO = ModuleDTO.builder()
+                .title(title)
+                .description(description)
+                .id(id)
+                .priority(priority)
+                .startDate(startDate)
+                .parent(ModuleDTO.builder().title(getParent().title).id(getParent().id).build())
+                .endDate(endDate)
+                .createdAt(createdAt)
+                .subModules(getSubModules().stream().map(Module::getPartialDTO).toList())
+                .assignments(getAssignments().stream().map(Assignment::toPartialDTO).toList())
+                .notes(getNotes().stream().map(Notes::getPartialDTO).toList())
+
+                .build();
+        return moduleDTO;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+       Module node = (Module) o;
+        return Objects.equals(id, node.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
