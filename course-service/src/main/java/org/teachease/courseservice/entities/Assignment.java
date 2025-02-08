@@ -5,6 +5,7 @@ import lombok.Data;
 import org.teachease.courseservice.dtos.AssignmentDTO;
 import org.teachease.courseservice.dtos.ModuleDTO;
 
+
 import java.sql.Timestamp;
 
 @Entity
@@ -41,4 +42,18 @@ public AssignmentDTO toPartialDTO() {
             .points(points)
             .build();
 }
+
+    public AssignmentDTO getPartialDTO() {
+    return AssignmentDTO.builder()
+            .id(id)
+            .module(module.getPartialDTO())
+            .title(title)
+            .points(points)
+            .dueDate(dueDate)
+            .createdAt(createdAt)
+            .assignmentResource(assignmentResource)
+            .solutionResource(solutionResource)
+            .courseId(courseId)
+            .build();
+    }
 }

@@ -23,6 +23,4 @@ public class ModuleContent {
     private String fileType;
     private Timestamp createdAt;
     private boolean hidden = false;
-
-
 }
