@@ -9,11 +9,15 @@ import org.teachease.courseservice.dtos.ModuleListDTO;
 import org.teachease.courseservice.entities.CourseEntity;
 import org.teachease.courseservice.entities.Module;
 import org.teachease.courseservice.entities.ModuleList;
+import org.teachease.courseservice.errorhandler.errors.InternalServerError;
+import org.teachease.courseservice.errorhandler.errors.ResourceNotFoundException;
+import org.teachease.courseservice.errorhandler.errors.UnauthorisedException;
 import org.teachease.courseservice.repositories.CourseRepository;
 import org.teachease.courseservice.repositories.ModuleNodeRepository;
 
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,11 +42,11 @@ public class ModuleService {
 
             CourseEntity course = courseRepository.findById(courseId).orElse(null);
             if(course == null) {
-                throw new RuntimeException("Course not found");
+                throw new ResourceNotFoundException("Course",courseId,new Timestamp(System.currentTimeMillis()));
             }
             boolean permission = authoriseReadPermission(courseId,userId);
             if(!permission) {
-                throw new RuntimeException("You do not have permission to access this resource");
+                throw new UnauthorisedException("Course",courseId,"READ");
             }
 
             Sort.Direction direction = "desc".equalsIgnoreCase(sortOrder) ? Sort.Direction.DESC : Sort.Direction.ASC;
@@ -50,7 +54,7 @@ public class ModuleService {
                     if(parentId != null) {
                         Module parent = moduleNodeRepository.findById(parentId).orElse(null);
                         if(parent == null) {
-                            throw new RuntimeException("Parent not found");
+                            throw new ResourceNotFoundException("Module",parentId,new Timestamp(System.currentTimeMillis()));
                         }
                         modules = moduleNodeRepository.findByCourseAndParent(course,parent ,PageRequest.of(page, limit,Sort.by(direction,sortBy)));
                     }
@@ -63,44 +67,10 @@ public class ModuleService {
         }
         catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("Something went wrong");
+            throw new InternalServerError(e.getMessage(), Arrays.toString(e.getStackTrace()), new Timestamp(System.currentTimeMillis()));
         }
     }
-    // get modules for student with enrollment id
-    public Page<Module> getCourseModules(String courseId, int limit, int page, String sortOrder, String sortBy, String parentId,String userId,String enrollmentId) {
 
-        try{
-
-            CourseEntity course = courseRepository.findById(courseId).orElse(null);
-            if(course == null) {
-                throw new RuntimeException("Course not found");
-            }
-            boolean permission = authoriseReadPermission(courseId,userId,enrollmentId);
-            if(!permission) {
-                throw new RuntimeException("You do not have permission to access this resource");
-            }
-
-            Sort.Direction direction = "desc".equalsIgnoreCase(sortOrder) ? Sort.Direction.DESC : Sort.Direction.ASC;
-            Page<Module> modules ;
-            if(parentId != null) {
-                Module parent = moduleNodeRepository.findById(parentId).orElse(null);
-                if(parent == null) {
-                    throw new RuntimeException("Parent not found");
-                }
-                modules = moduleNodeRepository.findByCourseAndParent(course,parent ,PageRequest.of(page, limit,Sort.by(direction,sortBy)));
-            }
-            else{
-                modules = moduleNodeRepository.findByCourse(course, PageRequest.of(page, limit,Sort.by(direction,sortBy)));
-
-            }
-
-            return modules;
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            throw new RuntimeException("Something went wrong");
-        }
-    }
     public ModuleDTO addModule(ModuleDTO moduleDTO,String userId) {
        CourseEntity course = courseRepository.findById(moduleDTO.getCourseId()).orElse(null);
        if(course == null) {
